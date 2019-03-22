@@ -1,5 +1,5 @@
 {
-  "name": "@joinbox/loopback-component-relation-filter",
+  "name": "@rc/loopback-component-relation-filter",
   "version": "0.2.1",
   "description": "Enables where query filters over related models via loopback api.",
   "main": "index.js",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joinbox/loopback-relation-filter.git"
+    "url": "git+https://github.com/collaorodrigo7/loopback-component-relation-filter.git"
   },
   "keywords": [
     "loopback",
@@ -32,9 +32,9 @@
   "author": "Michael Rüfenacht",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/joinbox/loopback-relation-filter/issues"
+    "url": "https://github.com/collaorodrigo7/loopback-component-relation-filter/issues"
   },
-  "homepage": "https://github.com/joinbox/loopback-relation-filter#readme",
+  "homepage": "https://github.com/collaorodrigo7/loopback-component-relation-filter",
   "devDependencies": {
     "chai": "^4.1.2",
     "eslint": "^4.12.1",
