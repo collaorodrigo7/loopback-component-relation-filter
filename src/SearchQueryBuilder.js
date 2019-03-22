@@ -4,7 +4,7 @@ const _ = require('lodash');
 const ModelWrapper = require('./ModelWrapper');
 const TableAliasProvider = require('./TableAliasProvider');
 const SearchQueryNormalizer = require('./SearchQueryNormalizer');
-
+var mySeenRelations=[];
 const { UnknownOperatorError }= require('./error');
 
 const operatorMaps = {
@@ -199,7 +199,17 @@ module.exports = class SearchQueryBuilder {
     }
 
     _trackAliases(rootModel, relationName, aliasProvider, seenRelations, options = {}) {
-
+      //This is a patch and temporary solution. I am not sure what
+      //else will this break
+      let seen=false;
+      let myrelation="";
+      if(mySeenRelations.indexOf(relationName)<0){
+        mySeenRelations.push(relationName)
+      }else{
+        seen=true;
+        myrelation=`${rootModel.alias}${aliasProvider.separator}${relationName}`
+        delete aliasProvider.aliases[myrelation]
+      }
         const previousResult = seenRelations[relationName];
 
         if (previousResult) {
