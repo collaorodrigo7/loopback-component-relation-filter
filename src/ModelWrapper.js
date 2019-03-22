@@ -21,7 +21,9 @@ module.exports = class ModelWrapper {
   }
 
   getSchema() {
-      return this.connector.schema(this.getModelName());
+      var ds = this.model.getDataSource();
+      return ds && ds.settings && ds.settings.database;
+      // return this.connector.schema(this.getModelName());
   }
 
   getFullyQualifiedTable() {
