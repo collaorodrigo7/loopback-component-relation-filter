@@ -2,6 +2,7 @@
 
 This is repo is cloned from https://github.com/joinbox/loopback-component-relation-filter,
 and I am just adding mysql support suggested by another user in the same repo.
+All the credit goes to them and their contributors.
 
 # loopback-relation-filter
 Enables where query filters on related loopback models.
