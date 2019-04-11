@@ -258,12 +258,14 @@ module.exports = class SearchQueryBuilder {
      */
     getAllJoins(rootModel, { and = [], or = [] }, order, aliasProvider) {
         const filters = and.concat(or).concat(order);
+        let flattenFilters=[];
+        this._flattenFilter(filters,flattenFilters);
         const children = [];
         const relations = {};
         const joins = [];
         const opts = { preserveCase: this.preserveColumnCase };
 
-        this._forEachQuery(filters, (propertyName, query) => {
+        this._forEachQuery(flattenFilters, (propertyName, query) => {
             // The result found for the join (gathered by _trackAliases) is stored on the
             // relations object.
             if (rootModel.isRelation(propertyName) && !relations[propertyName]) {
@@ -295,6 +297,21 @@ module.exports = class SearchQueryBuilder {
             allJoins.push(...lowerJoins);
             return allJoins;
         }, joins.slice(0));
+    }
+
+    _flattenFilter(data, outputArray) {
+      if(Array.isArray(data)) {
+        data.forEach((element)=>{
+          this._flattenFilter(element, outputArray);
+        });
+      }else if(typeof(data)==='object'){
+        outputArray.push(data)
+        for (let key in data) {
+          if(Array.isArray(data[key])) {
+            this._flattenFilter(data[key], outputArray);
+          }
+        }
+      }
     }
 
     _joinMapping({keyFrom, modelTo, modelThrough, relation, table}, opts){
