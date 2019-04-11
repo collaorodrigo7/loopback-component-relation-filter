@@ -118,13 +118,15 @@ module.exports = class SearchQueryNormalizer {
             Object
                 .keys(query)
                 .forEach((property) => {
+                    let originalProp=property
+                    property = property.replace(/\$/g, '');
                     if (model.isProperty(property)) {
-                        queries.push(this.normalizeProperty(model, property, query[property]));
+                        queries.push(this.normalizeProperty(model, property, query[originalProp]));
                     }
                     if (model.isRelation(property)) {
                         const targetModel = model.getRelation(property).modelTo;
                         queries.push({
-                            [property]: this.normalizeQuery(targetModel.modelName, query[property]),
+                            [originalProp]: this.normalizeQuery(targetModel.modelName, query[originalProp]),
                         });
                     }
                     if (property === 'and') {

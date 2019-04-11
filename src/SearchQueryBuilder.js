@@ -45,10 +45,11 @@ const operatorMaps = {
 
 module.exports = class SearchQueryBuilder {
 
-    constructor(models, { rejectUnknownProperties = false, preserveColumnCase = true, joinMethod = 'inner' } = {}) {
+    constructor(models, { rejectUnknownProperties = false, preserveColumnCase = true, joinMethod = 'inner', joinOptions } = {}) {
         this.models = models;
         this.preserveColumnCase = preserveColumnCase;
         this.joinMethod = joinMethod;
+        this.joinOptions = joinOptions;
         this._supportedClients = {
             postgresql: 'pg',
             mysql: 'mysql'
@@ -97,11 +98,19 @@ module.exports = class SearchQueryBuilder {
         const filterAliasProvider = aliasProvider.spawnProvider();
         // 1. iterate the query and collect all joins
         const joins = this.getAllJoins(rootModel, query, order, joinAliasProvider);
-        joins.forEach(({ table, keyFrom, keyTo }) => {
-            if (this.joinMethod === 'left') {
+        joins.forEach(({ table, keyFrom, keyTo, joinType }) => {
+            if (joinType) {
+              if (joinType === 'left') {
                 builder.leftJoin(table, { [keyFrom]: keyTo });
-            } else {
+              } else {
                 builder.join(table, { [keyFrom]: keyTo });
+              }
+            } else {
+              if (this.joinMethod === 'left') {
+                  builder.leftJoin(table, { [keyFrom]: keyTo });
+              } else {
+                  builder.join(table, { [keyFrom]: keyTo });
+              }
             }
 
         });
@@ -269,15 +278,23 @@ module.exports = class SearchQueryBuilder {
         this._forEachQuery(flattenFilters, (propertyName, query) => {
             // The result found for the join (gathered by _trackAliases) is stored on the
             // relations object.
+            let joinType = this._parseJoinType(propertyName);
+            propertyName = propertyName.replace(/\$/g, '');
             if (rootModel.isRelation(propertyName) && !relations[propertyName]) {
                 // alias the model we are going to join
-                const aliases  = this._trackAliases(
+                let aliases  = this._trackAliases(
                     rootModel,
                     propertyName,
                     aliasProvider,
                     relations,
                     opts,
                 );
+                if(joinType){
+                    aliases.joinType = joinType;
+                }
+                else if(this.joinOptions){
+                    aliases.joinType = this.joinOptions[propertyName];
+                }
                 // store the children of the current level for breadth-first traversal
                 children.push({ model: aliases.modelTo, query });
                 // its kind of a reference (not a mapping)
@@ -299,6 +316,17 @@ module.exports = class SearchQueryBuilder {
             return allJoins;
         }, joins.slice(0));
     }
+    
+    _parseJoinType(property){
+      let type=null;
+      if(property[0]=='$'){
+        type="left";
+        if(property[property.length-1]=='$'){
+          type="inner"
+        }
+      }
+      return type;
+    }
 
     _flattenFilter(data, outputArray) {
       if(Array.isArray(data)) {
@@ -315,7 +343,7 @@ module.exports = class SearchQueryBuilder {
       }
     }
 
-    _joinMapping({keyFrom, modelTo, modelThrough, relation, table}, opts){
+    _joinMapping({keyFrom, modelTo, modelThrough, relation, table,joinType}, opts){
         // get the id of the target model
         const [targetModelId] = modelTo.getIdProperties({
             ignoreAlias: true,
@@ -332,21 +360,24 @@ module.exports = class SearchQueryBuilder {
                 table: modelThrough.getAliasedTable(),
                 keyFrom,
                 keyTo: modelThrough.getColumnName(relation.keyTo, opts),
+                joinType
             },
             {
                 table,
                 keyFrom: modelThrough.getColumnName(relation.keyThrough, opts),
                 keyTo: modelTo.getColumnName(targetKey, opts),
+                joinType
             },
         ];
     }
 
-    _joinReference({keyFrom, modelTo, relation, table}, opts){
+    _joinReference({keyFrom, modelTo, relation, table, joinType}, opts){
         const keyTo = modelTo.getColumnName(relation.keyTo, opts);
         return {
             table,
             keyFrom,
             keyTo,
+            joinType
         };
     }
 
