@@ -358,8 +358,14 @@ module.exports = class SearchQueryBuilder {
             const content = value[operator];
             switch (operator) {
             case '=':
+                if(content===null || content===undefined){//where prop is null
+                  return builder.whereNull(property)
+                }
                 return builder.where(property, content);
             case 'neq':
+                if(content===null || content===undefined){//this means neq:null
+                  return builder.whereNotNull(property)
+                }
             case 'gt':
             case 'lt':
             case 'gte':
