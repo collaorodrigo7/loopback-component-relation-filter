@@ -203,11 +203,12 @@ module.exports = class SearchQueryBuilder {
       //else will this break
       let seen=false;
       let myrelation="";
-      if(mySeenRelations.indexOf(relationName)<0){
-        mySeenRelations.push(relationName)
+      let relationNameKey=relationName.toLocaleLowerCase()
+      if(mySeenRelations.indexOf(relationNameKey)<0){
+        mySeenRelations.push(relationNameKey)
       }else{
         seen=true;
-        myrelation=`${rootModel.alias}${aliasProvider.separator}${relationName}`
+        myrelation=`${rootModel.alias}${aliasProvider.separator}${relationNameKey}`
         delete aliasProvider.aliases[myrelation]
       }
         const previousResult = seenRelations[relationName];
