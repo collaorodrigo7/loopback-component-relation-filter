@@ -145,6 +145,7 @@ module.exports = class SearchQueryBuilder {
             // of the query builder every time we enter a new branch.
             // TODO do not use internal knex stuff ? re-generate a sub query ?
             const subQueryBuilder = opts.isOr ? builder.or : builder.and;
+            propertyName = propertyName.replace(/\$/g, ''); //this will only really matter when its a relation
             if (rootModel.isRelation(propertyName)) {
                 const { modelTo } = this._trackAliases(
                     rootModel,
