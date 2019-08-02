@@ -44,7 +44,8 @@ function extendedFindQuery(model, models, { rejectUnknownProperties = false, pre
             const filter = Object.assign({}, originalFilter);
 
             try {
-                const idName = model.getIdName();
+                let idName = model.getIdName();
+                let dbIdName = model.definition.properties[idName].dbIdName||idName;
                 const databaseQuery = builder.buildQuery(model.modelName, filter);
                 const sqlString = databaseQuery.toString();
 
@@ -58,7 +59,7 @@ function extendedFindQuery(model, models, { rejectUnknownProperties = false, pre
                         ctx.query.where = {[idName]: -1};
                         next();
                     } else {
-                        const resultIds = result.map(entry => entry[idName]);
+                        const resultIds = result.map(entry => entry[dbIdName]);
                         // Removed the check for an existing id query, since the result of the
                         // database query should include the corresponding id already!
                         // Therefore we remove all the other constrains since they could lead to
